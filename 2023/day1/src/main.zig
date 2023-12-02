@@ -2,19 +2,15 @@ const std = @import("std");
 const fs = std.fs;
 
 pub fn main() !void {
-    var file = try fs.cwd().openFile("input.txt", fs.File.OpenFlags{ .mode = .read_only });
+    const file = try fs.cwd().openFile("input.txt", fs.File.OpenFlags{ .mode = .read_only });
     defer file.close();
-    var reader = file.reader();
 
-    var arraylist = std.ArrayList(u8).init(std.heap.page_allocator);
-
-    try reader.streamUntilDelimiter(arraylist.writer(), '\n', null);
-
+    const reader = file.reader();
+    var arraylist: std.ArrayList(u8) = std.ArrayList(u8).init(std.heap.page_allocator);
     var sum: i32 = 0;
 
-    while (arraylist.items.len > 0) {
+    while (readNextLineArrayList(reader, &arraylist)) {
         var str: []u8 = arraylist.items;
-        std.debug.print("{s} \n", .{str});
 
         var i: usize = 0;
         var j: usize = str.len - 1;
@@ -38,10 +34,13 @@ pub fn main() !void {
         }
 
         sum = sum + value;
-
-        arraylist.clearAndFree();
-        reader.streamUntilDelimiter(arraylist.writer(), '\n', null) catch break;
     }
 
     std.debug.print("Final Sum: {d}\n", .{sum});
+}
+
+fn readNextLineArrayList(reader: std.fs.File.Reader, arrayList: *std.ArrayList(u8)) bool {
+    arrayList.clearAndFree();
+    reader.streamUntilDelimiter(arrayList.writer(), '\n', null) catch return false;
+    return true;
 }
