@@ -7,6 +7,10 @@ pub fn main() !void {
     const reader = file.reader();
     var varBuffer = std.ArrayList(u8).init(std.heap.page_allocator);
 
-    try reader.streamUntilDelimiter(varBuffer.writer(), '\n', null);
-    std.debug.print("First Line: {s} \n", .{varBuffer.allocatedSlice()});
+    while (reader.streamUntilDelimiter(varBuffer.writer(), '\n', null)) {
+        std.debug.print("{s} \n", .{varBuffer.allocatedSlice()});
+        varBuffer.clearAndFree();
+    } else |err| {
+        _ = err catch null;
+    }
 }
