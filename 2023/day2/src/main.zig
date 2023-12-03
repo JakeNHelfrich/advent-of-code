@@ -7,13 +7,24 @@ pub fn main() !void {
     const reader = file.reader();
 
     var gameNum: i32 = 1;
+    var sum: i32 = 0;
     while (readNextGame(reader)) |gameInfo| {
-        const firstSet = gameInfo.items[0];
-        std.debug.print("Game {d}: Total Red = {d} \n", .{ gameNum, firstSet.red });
+        var valid: bool = true;
+        for (gameInfo.items) |set| {
+            if (set.red > 12 or set.green > 13 or set.blue > 14) {
+                valid = false;
+                break;
+            }
+        }
+        if (valid) {
+            sum += gameNum;
+        }
         gameNum += 1;
     } else |err| {
         _ = err catch null;
     }
+
+    std.debug.print("Total Sum: {d}\n", .{sum});
 }
 
 const Colour = enum(u8) {
@@ -45,12 +56,12 @@ fn readNextGame(reader: std.fs.File.Reader) !GameInfo {
 
     var gameInfo = GameInfo.init(std.heap.page_allocator);
     while (setsItr.next()) |set| {
-        var cubeIter = std.mem.tokenizeSequence(u8, set, ",");
         var setInfo = SetInfo{
             .red = 0,
             .green = 0,
             .blue = 0,
         };
+        var cubeIter = std.mem.tokenizeSequence(u8, set, ",");
         while (cubeIter.next()) |cube| {
             var cubeInfo = std.mem.trim(u8, cube, " \x00");
             var cubeInfoItr = std.mem.splitSequence(u8, cubeInfo, " ");
