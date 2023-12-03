@@ -11,10 +11,9 @@ pub fn main() !void {
     var arraylist: std.ArrayList(u8) = std.ArrayList(u8).init(std.heap.page_allocator);
     var sum: i32 = 0;
 
-    while (reader.streamUntilDelimiter(arraylist.writer(), '\n', null)) {
+    while (reader.streamUntilDelimiter(arraylist.writer(), '\n', null)) : (arraylist.clearAndFree()) {
         var instruction: []const u8 = arraylist.items;
         sum = sum + calculateConfigurationValue(instruction);
-        arraylist.clearAndFree();
     } else |err| {
         _ = err catch null;
     }
