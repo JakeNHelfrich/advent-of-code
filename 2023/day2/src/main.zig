@@ -28,7 +28,20 @@ pub fn main() !void {
         }
     }
 
+    //part2
+    var powerSum: i32 = 0;
+    for (games.items) |gameInfo| {
+        var maximumSet = SetInfo{ .red = 0, .green = 0, .blue = 0 };
+        for (gameInfo.items) |set| {
+            maximumSet.red = @max(set.red, maximumSet.red);
+            maximumSet.green = @max(set.green, maximumSet.green);
+            maximumSet.blue = @max(set.blue, maximumSet.blue);
+        }
+        powerSum += maximumSet.red * maximumSet.green * maximumSet.blue;
+    }
+
     std.debug.print("Total Sum: {d}\n", .{sum});
+    std.debug.print("Total Power Sum: {d}\n", .{powerSum});
 }
 
 const Colour = enum(u8) {
