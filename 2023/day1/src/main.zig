@@ -1,5 +1,7 @@
 const std = @import("std");
 const fs = std.fs;
+const isDigit = std.ascii.isDigit;
+const charToDigit = std.fmt.charToDigit;
 
 pub fn main() !void {
     const file = try fs.cwd().openFile("input.txt", fs.File.OpenFlags{ .mode = .read_only });
@@ -17,29 +19,25 @@ pub fn main() !void {
     std.debug.print("Final Sum: {d}\n", .{sum});
 }
 
-fn readNextLineArrayList(reader: std.fs.File.Reader, arrayList: *std.ArrayList(u8)) bool {
-    arrayList.clearAndFree();
-    reader.streamUntilDelimiter(arrayList.writer(), '\n', null) catch return false;
-    return true;
-}
-
 fn calculateConfigurationValue(instruction: []const u8) i32 {
     var i: usize = 0;
     var j: usize = instruction.len - 1;
 
     while (i <= j) {
-        var ii: i32 = std.fmt.charToDigit(instruction[i], 10) catch 0;
-        var jj: i32 = std.fmt.charToDigit(instruction[j], 10) catch 0;
+        const ii = instruction[i];
+        const jj = instruction[j];
 
-        if (ii == 0) {
-            i = i + 1;
+        if (!isDigit(ii)) {
+            i += 1;
         }
-        if (jj == 0) {
-            j = j - 1;
+        if (!isDigit(jj)) {
+            j -= 1;
         }
 
-        if (ii > 0 and jj > 0) {
-            return ii * 10 + jj;
+        if (isDigit(ii) and isDigit(jj)) {
+            const a = charToDigit(ii, 10) catch 0;
+            const b = charToDigit(jj, 10) catch 0;
+            return a * 10 + b;
         }
     }
     return 0;
@@ -57,4 +55,11 @@ test "Testing Calculate Configuration value" {
         const configurationValue = calculateConfigurationValue(instruction);
         try std.testing.expect(configurationValue == expected[ind]);
     }
+}
+
+// I couldn't find a std lib function that would do this for me...
+fn readNextLineArrayList(reader: std.fs.File.Reader, arrayList: *std.ArrayList(u8)) bool {
+    arrayList.clearAndFree();
+    reader.streamUntilDelimiter(arrayList.writer(), '\n', null) catch return false;
+    return true;
 }
