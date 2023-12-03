@@ -6,9 +6,16 @@ pub fn main() !void {
 
     const reader = file.reader();
 
-    var gameNum: i32 = 1;
-    var sum: i32 = 0;
+    var games = std.ArrayList(GameInfo).init(std.heap.page_allocator);
     while (readNextGame(reader)) |gameInfo| {
+        try games.append(gameInfo);
+    } else |err| {
+        _ = err catch null;
+    }
+
+    //part1
+    var sum: i32 = 0;
+    for (games.items, 1..) |gameInfo, gameNum| {
         var valid: bool = true;
         for (gameInfo.items) |set| {
             if (set.red > 12 or set.green > 13 or set.blue > 14) {
@@ -17,11 +24,8 @@ pub fn main() !void {
             }
         }
         if (valid) {
-            sum += gameNum;
+            sum += @intCast(gameNum);
         }
-        gameNum += 1;
-    } else |err| {
-        _ = err catch null;
     }
 
     std.debug.print("Total Sum: {d}\n", .{sum});
