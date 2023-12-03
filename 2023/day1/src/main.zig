@@ -11,9 +11,12 @@ pub fn main() !void {
     var arraylist: std.ArrayList(u8) = std.ArrayList(u8).init(std.heap.page_allocator);
     var sum: i32 = 0;
 
-    while (readNextLineArrayList(reader, &arraylist)) {
+    while (reader.streamUntilDelimiter(arraylist.writer(), '\n', null)) {
         var instruction: []const u8 = arraylist.items;
         sum = sum + calculateConfigurationValue(instruction);
+        arraylist.clearAndFree();
+    } else |err| {
+        _ = err catch null;
     }
 
     std.debug.print("Final Sum: {d}\n", .{sum});
@@ -55,11 +58,4 @@ test "Testing Calculate Configuration value" {
         const configurationValue = calculateConfigurationValue(instruction);
         try std.testing.expect(configurationValue == expected[ind]);
     }
-}
-
-// I couldn't find a std lib function that would do this for me...
-fn readNextLineArrayList(reader: std.fs.File.Reader, arrayList: *std.ArrayList(u8)) bool {
-    arrayList.clearAndFree();
-    reader.streamUntilDelimiter(arrayList.writer(), '\n', null) catch return false;
-    return true;
 }
