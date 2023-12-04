@@ -34,6 +34,7 @@ pub fn main() !void {
 const Number = struct { value: i32, y: i32, x: struct { i32, i32 } };
 
 const Pattern = struct {
+    value: u8,
     x: i32,
     y: i32,
 };
@@ -70,7 +71,7 @@ fn parseBoard(reader: anytype) !Board {
                 const number = Number{ .value = try std.fmt.parseInt(i32, numberList.items, 10), .y = row, .x = .{ start, end } };
                 try numbers.append(number);
             } else if (!std.ascii.isAlphanumeric(char) and char != '.') {
-                const pattern = Pattern{ .y = row, .x = @intCast(curr) };
+                const pattern = Pattern{ .value = char, .y = row, .x = @intCast(curr) };
                 try patterns.append(pattern);
             }
         }
