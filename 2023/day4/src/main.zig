@@ -1,19 +1,32 @@
 const std = @import("std");
 
 pub fn main() !void {
-    const file = try std.fs.cwd().openFile("example.txt", .{ .mode = .read_only });
+    const file = try std.fs.cwd().openFile("input.txt", .{ .mode = .read_only });
     defer file.close();
 
     const reader = file.reader();
 
-    const card: Card = try parseNextCard(reader);
-    const winningNumber: bool = card.winningNumbers.contains(41);
-    const scratchedNumber: bool = card.scratchedNumbers.contains(83);
-    std.debug.print("Card {d}| {d} {d}\n", .{ card.number, @intFromBool(winningNumber), @intFromBool(scratchedNumber) });
+    var sum: i32 = 0;
+    while (parseNextCard(reader)) |card| {
+        var winningNumbersIterator = card.winningNumbers.iterator();
+        var numMatches: i32 = 0;
+        while (winningNumbersIterator.next()) |winningNumberEntry| {
+            const winningNumber: i32 = winningNumberEntry.key_ptr.*;
+            if (card.scratchedNumbers.contains(winningNumber)) {
+                numMatches += 1;
+            }
+        }
+        if (numMatches > 0) {
+            sum += std.math.pow(i32, 2, numMatches - 1);
+        }
+    } else |err| {
+        _ = err catch null;
+    }
+
+    std.debug.print("Pile of Cards value = {d} \n", .{sum});
 }
 
 const Card = struct {
-    number: i32,
     winningNumbers: std.AutoArrayHashMap(i32, i32),
     scratchedNumbers: std.AutoArrayHashMap(i32, i32),
 };
@@ -26,10 +39,7 @@ fn parseNextCard(reader: anytype) !Card {
 
     var cardLine = std.mem.splitSequence(u8, buffer.items, ": ");
 
-    var cardInfo: []const u8 = cardLine.first();
-    var cardInfoIter = std.mem.splitSequence(u8, cardInfo, " ");
-    _ = cardInfoIter.first();
-    var cardNumber = try std.fmt.parseInt(i32, cardInfoIter.rest(), 10);
+    _ = cardLine.first();
 
     var numberInfo: []const u8 = cardLine.rest();
     var numberInfoIter = std.mem.split(u8, numberInfo, " | ");
@@ -51,7 +61,6 @@ fn parseNextCard(reader: anytype) !Card {
     }
 
     return Card{
-        .number = cardNumber,
         .winningNumbers = winningNumbers,
         .scratchedNumbers = scratchedNumbers,
     };
