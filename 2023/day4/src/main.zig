@@ -7,15 +7,9 @@ pub fn main() !void {
     const reader = file.reader();
 
     var sum: i32 = 0;
+    //part 1
     while (parseNextCard(reader)) |card| {
-        var winningNumbersIterator = card.winningNumbers.iterator();
-        var numMatches: i32 = 0;
-        while (winningNumbersIterator.next()) |winningNumberEntry| {
-            const winningNumber: i32 = winningNumberEntry.key_ptr.*;
-            if (card.scratchedNumbers.contains(winningNumber)) {
-                numMatches += 1;
-            }
-        }
+        var numMatches = calculateMatchingNumbers(card);
         if (numMatches > 0) {
             sum += std.math.pow(i32, 2, numMatches - 1);
         }
@@ -30,6 +24,18 @@ const Card = struct {
     winningNumbers: std.AutoArrayHashMap(i32, i32),
     scratchedNumbers: std.AutoArrayHashMap(i32, i32),
 };
+
+fn calculateMatchingNumbers(card: Card) i32 {
+    var winningNumbersIterator = card.winningNumbers.iterator();
+    var numMatches: i32 = 0;
+    while (winningNumbersIterator.next()) |winningNumberEntry| {
+        const winningNumber: i32 = winningNumberEntry.key_ptr.*;
+        if (card.scratchedNumbers.contains(winningNumber)) {
+            numMatches += 1;
+        }
+    }
+    return numMatches;
+}
 
 fn parseNextCard(reader: anytype) !Card {
     var buffer = std.ArrayList(u8).init(std.heap.page_allocator);
