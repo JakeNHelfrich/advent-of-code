@@ -6,15 +6,20 @@ pub fn main() !void {
 
     const reader = file.reader();
 
+    var cards = std.ArrayList(Card).init(std.heap.page_allocator);
+    while (parseNextCard(reader)) |card| {
+        try cards.append(card);
+    } else |err| {
+        _ = err catch null;
+    }
+
     var sum: i32 = 0;
     //part 1
-    while (parseNextCard(reader)) |card| {
+    for (cards.items) |card| {
         var numMatches = calculateMatchingNumbers(card);
         if (numMatches > 0) {
             sum += std.math.pow(i32, 2, numMatches - 1);
         }
-    } else |err| {
-        _ = err catch null;
     }
 
     std.debug.print("Pile of Cards value = {d} \n", .{sum});
