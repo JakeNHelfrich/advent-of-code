@@ -37,7 +37,7 @@ pub fn main() !void {
         while (num <= numWinnings) : (num += 1) {
             var cardNumberToAdd = cardNumber + num;
             var numClonesToAdd = cardClones.get(cardNumberToAdd) orelse 0;
-            try cardClones.put(cardNumberToAdd, numClonesToAdd + 1 * (numClones + 1));
+            try cardClones.put(cardNumberToAdd, numClonesToAdd + (numClones + 1));
         }
     }
 
