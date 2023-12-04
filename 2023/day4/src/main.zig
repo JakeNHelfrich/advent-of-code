@@ -34,7 +34,7 @@ pub fn main() !void {
         try cardClones.put(cardNumber, numClones);
 
         var num: i32 = 1;
-        while (num <= numWinnings) : (num += 1) {
+        while (num <= numWinnings and cardNumber + num - 1 < cards.items.len) : (num += 1) {
             var cardNumberToAdd = cardNumber + num;
             var numClonesToAdd = cardClones.get(cardNumberToAdd) orelse 0;
             try cardClones.put(cardNumberToAdd, numClonesToAdd + (numClones));
@@ -43,7 +43,7 @@ pub fn main() !void {
 
     var iter = cardClones.valueIterator();
     while (iter.next()) |entry| {
-        var count = entry.*;
+        var count: i32 = entry.*;
         sumClones += count;
     }
     std.debug.print("Total Number of Cloned Cards : {d} \n", .{sumClones});
