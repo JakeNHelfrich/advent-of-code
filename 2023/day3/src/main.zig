@@ -9,22 +9,11 @@ pub fn main() !void {
 
     var sum: i32 = 0;
     for (board.numbers) |number| {
-        var nextToPattern = false;
         for (board.patterns) |pattern| {
-            var directlyAdjacent = std.math.absCast(number.y - pattern.y) == 1;
-            directlyAdjacent = directlyAdjacent and pattern.x >= number.x[0] and pattern.x <= number.x[1];
-            directlyAdjacent = directlyAdjacent or (std.math.absCast(number.x[0] - pattern.x) == 1 and number.y == pattern.y);
-            directlyAdjacent = directlyAdjacent or (std.math.absCast(number.x[1] - pattern.x) == 1 and number.y == pattern.y);
-
-            var diagonallyAdjacent = std.math.absCast(number.y - pattern.y) == 1;
-            diagonallyAdjacent = diagonallyAdjacent and
-                (std.math.absCast(number.x[0] - pattern.x) == 1 or std.math.absCast(number.x[1] - pattern.x) == 1);
-
-            nextToPattern = nextToPattern or (directlyAdjacent or diagonallyAdjacent);
-        }
-
-        if (nextToPattern) {
-            sum += number.value;
+            if (isNumberAdjacentToPattern(number, pattern)) {
+                sum += number.value;
+                break;
+            }
         }
     }
 
@@ -43,6 +32,19 @@ const Board = struct {
     numbers: []Number,
     patterns: []Pattern,
 };
+
+fn isNumberAdjacentToPattern(number: Number, pattern: Pattern) bool {
+    var directlyAdjacent = std.math.absCast(number.y - pattern.y) == 1;
+    directlyAdjacent = directlyAdjacent and pattern.x >= number.x[0] and pattern.x <= number.x[1];
+    directlyAdjacent = directlyAdjacent or (std.math.absCast(number.x[0] - pattern.x) == 1 and number.y == pattern.y);
+    directlyAdjacent = directlyAdjacent or (std.math.absCast(number.x[1] - pattern.x) == 1 and number.y == pattern.y);
+
+    var diagonallyAdjacent = std.math.absCast(number.y - pattern.y) == 1;
+    diagonallyAdjacent = diagonallyAdjacent and
+        (std.math.absCast(number.x[0] - pattern.x) == 1 or std.math.absCast(number.x[1] - pattern.x) == 1);
+
+    return (directlyAdjacent or diagonallyAdjacent);
+}
 
 fn parseBoard(reader: anytype) !Board {
     var numbers = std.ArrayList(Number).init(std.heap.page_allocator);
