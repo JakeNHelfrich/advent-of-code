@@ -29,15 +29,15 @@ pub fn main() !void {
     var cardClones = std.AutoHashMap(i32, i32).init(std.heap.page_allocator);
     for (cards.items, 1..) |card, cardNumberUsize| {
         var cardNumber: i32 = @intCast(cardNumberUsize);
-        var numClones: i32 = cardClones.get(cardNumber) orelse 0;
+        var numClones: i32 = 1 + (cardClones.get(cardNumber) orelse 0);
         var numWinnings = calculateMatchingNumbers(card);
-        try cardClones.put(cardNumber, numClones + 1);
+        try cardClones.put(cardNumber, numClones);
 
         var num: i32 = 1;
         while (num <= numWinnings) : (num += 1) {
             var cardNumberToAdd = cardNumber + num;
             var numClonesToAdd = cardClones.get(cardNumberToAdd) orelse 0;
-            try cardClones.put(cardNumberToAdd, numClonesToAdd + (numClones + 1));
+            try cardClones.put(cardNumberToAdd, numClonesToAdd + (numClones));
         }
     }
 
