@@ -8,6 +8,7 @@ pub fn main() !void {
     var board = try parseBoard(reader);
 
     var sum: i32 = 0;
+    //part 1
     for (board.numbers) |number| {
         for (board.patterns) |pattern| {
             if (isNumberAdjacentToPattern(number, pattern)) {
@@ -16,8 +17,24 @@ pub fn main() !void {
             }
         }
     }
-
     std.debug.print("Sum: {d}\n", .{sum});
+
+    //part 2
+    var gearRatioSum: i32 = 0;
+    for (board.patterns) |pattern| {
+        var adjacentNumbers = std.ArrayList(i32).init(std.heap.page_allocator);
+        for (board.numbers) |number| {
+            if (isNumberAdjacentToPattern(number, pattern)) {
+                try adjacentNumbers.append(number.value);
+            }
+        }
+
+        if (adjacentNumbers.items.len == 2) {
+            gearRatioSum += adjacentNumbers.items[0] * adjacentNumbers.items[1];
+        }
+    }
+
+    std.debug.print("Gear Ratio Sum: {d}\n", .{gearRatioSum});
 }
 
 const Number = struct { value: i32, y: i32, x: struct { i32, i32 } };
