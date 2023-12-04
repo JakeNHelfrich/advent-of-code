@@ -23,6 +23,30 @@ pub fn main() !void {
     }
 
     std.debug.print("Pile of Cards value = {d} \n", .{sum});
+
+    //part 2
+    var sumClones: i32 = 0;
+    var cardClones = std.AutoHashMap(i32, i32).init(std.heap.page_allocator);
+    for (cards.items, 1..) |card, cardNumberUsize| {
+        var cardNumber: i32 = @intCast(cardNumberUsize);
+        var numClones: i32 = cardClones.get(cardNumber) orelse 0;
+        var numWinnings = calculateMatchingNumbers(card);
+        try cardClones.put(cardNumber, numClones + 1);
+
+        var num: i32 = 1;
+        while (num <= numWinnings) : (num += 1) {
+            var cardNumberToAdd = cardNumber + num;
+            var numClonesToAdd = cardClones.get(cardNumberToAdd) orelse 0;
+            try cardClones.put(cardNumberToAdd, numClonesToAdd + 1 * (numClones + 1));
+        }
+    }
+
+    var iter = cardClones.valueIterator();
+    while (iter.next()) |entry| {
+        var count = entry.*;
+        sumClones += count;
+    }
+    std.debug.print("Total Number of Cloned Cards : {d} \n", .{sumClones});
 }
 
 const Card = struct {
