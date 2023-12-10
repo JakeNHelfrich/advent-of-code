@@ -11,7 +11,3 @@ pub fn main() !void {
     const second = first[0];
     std.debug.print("{d} {d} {d}\n", .{ second.dstStart, second.srcStart, second.len });
 }
-
-// IDEA:
-// Create a "getNextMap" function
-// Keep updating the source seeds with the new mapped and pass that into the nxt map
