@@ -1,13 +1,13 @@
 const std = @import("std");
 
 pub const Range = struct {
-    srcStart: i32,
-    dstStart: i32,
-    len: i32,
+    srcStart: i64,
+    dstStart: i64,
+    len: i64,
 };
 pub const AlmanacMap = []Range;
 pub const Almanac = struct {
-    seeds: []i32,
+    seeds: []i64,
     maps: []AlmanacMap,
 };
 
@@ -33,15 +33,15 @@ pub fn parseAlmanac(reader: anytype, alloc: std.mem.Allocator) !Almanac {
     return Almanac{ .seeds = seeds, .maps = almanacMaps.items };
 }
 
-fn parseSeeds(alloc: std.mem.Allocator, seedsLine: []u8) ![]i32 {
-    var seeds = std.ArrayList(i32).init(alloc);
+fn parseSeeds(alloc: std.mem.Allocator, seedsLine: []u8) ![]i64 {
+    var seeds = std.ArrayList(i64).init(alloc);
     var seedsIter = std.mem.splitSequence(u8, seedsLine, ": ");
     _ = seedsIter.first();
     var seedNumbers = seedsIter.rest();
     var seedNumbersIter = std.mem.tokenizeSequence(u8, seedNumbers, " ");
 
     while (seedNumbersIter.next()) |seedStr| {
-        var seed = try std.fmt.parseInt(i32, std.mem.trim(u8, seedStr, "\x00"), 10);
+        var seed = try std.fmt.parseInt(i64, std.mem.trim(u8, seedStr, "\x00"), 10);
         try seeds.append(seed);
     }
 
@@ -56,9 +56,9 @@ fn parseAlmanacMap(reader: anytype, alloc: std.mem.Allocator) !AlmanacMap {
         var line = buffer.items;
         var lineItr = std.mem.tokenizeSequence(u8, line, " ");
         var range = Range{
-            .dstStart = try std.fmt.parseInt(i32, lineItr.next().?, 10),
-            .srcStart = try std.fmt.parseInt(i32, lineItr.next().?, 10),
-            .len = try std.fmt.parseInt(i32, lineItr.next().?, 10),
+            .dstStart = try std.fmt.parseInt(i64, lineItr.next().?, 10),
+            .srcStart = try std.fmt.parseInt(i64, lineItr.next().?, 10),
+            .len = try std.fmt.parseInt(i64, lineItr.next().?, 10),
         };
         try almanacMap.append(range);
     } else |err| {
