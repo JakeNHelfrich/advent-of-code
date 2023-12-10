@@ -12,25 +12,14 @@ pub const Almanac = struct {
 };
 
 pub fn parseAlmanac(reader: anytype, alloc: std.mem.Allocator) !Almanac {
-    var almanacMaps = std.ArrayList(AlmanacMap).init(alloc);
-
     var buffer = std.ArrayList(u8).init(alloc);
     try reader.streamUntilDelimiter(buffer.writer(), '\n', null);
     const seeds = try parseSeeds(alloc, buffer.items);
     buffer.clearAndFree();
 
-    while (reader.streamUntilDelimiter(buffer.writer(), '\n', null)) : (buffer.clearAndFree()) {
-        if (buffer.items.len == 0) continue;
-        var line: []u8 = buffer.items;
-        if (std.mem.containsAtLeast(u8, line, 1, "map")) {
-            const almanacMap = try parseAlmanacMap(reader, alloc);
-            try almanacMaps.append(almanacMap);
-        }
-    } else |err| {
-        _ = err catch null;
-    }
+    const almanacMaps = try parseAlmanacMaps(reader, alloc);
 
-    return Almanac{ .seeds = seeds, .maps = almanacMaps.items };
+    return Almanac{ .seeds = seeds, .maps = almanacMaps };
 }
 
 fn parseSeeds(alloc: std.mem.Allocator, seedsLine: []u8) ![]i64 {
@@ -46,6 +35,24 @@ fn parseSeeds(alloc: std.mem.Allocator, seedsLine: []u8) ![]i64 {
     }
 
     return seeds.items;
+}
+
+fn parseAlmanacMaps(reader: anytype, alloc: std.mem.Allocator) ![]AlmanacMap {
+    var almanacMaps = std.ArrayList(AlmanacMap).init(alloc);
+
+    var buffer = std.ArrayList(u8).init(alloc);
+    while (reader.streamUntilDelimiter(buffer.writer(), '\n', null)) : (buffer.clearAndFree()) {
+        if (buffer.items.len == 0) continue;
+        var line: []u8 = buffer.items;
+        if (std.mem.containsAtLeast(u8, line, 1, "map")) {
+            const almanacMap = try parseAlmanacMap(reader, alloc);
+            try almanacMaps.append(almanacMap);
+        }
+    } else |err| {
+        _ = err catch null;
+    }
+
+    return almanacMaps.items;
 }
 
 fn parseAlmanacMap(reader: anytype, alloc: std.mem.Allocator) !AlmanacMap {
