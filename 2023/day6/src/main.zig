@@ -1,13 +1,30 @@
 const std = @import("std");
 
 pub fn main() !void {
-    const file = try std.fs.cwd().openFile("example.txt", .{ .mode = .read_only });
+    const file = try std.fs.cwd().openFile("input.txt", .{ .mode = .read_only });
     defer file.close();
 
     var reader = file.reader();
     var races = try parseRaces(reader, std.heap.page_allocator);
 
-    std.debug.print("{d} {d} \n", .{ races[0].time, races[0].distance });
+    var margin: i64 = 1;
+
+    for (races) |race| {
+        var holdTime: i64 = 0;
+        var speed: i64 = 0;
+        var numWaysToBeat: i64 = 0;
+        while (holdTime <= race.time) : ({
+            holdTime += 1;
+            speed += 1;
+        }) {
+            const distance = (race.time - holdTime) * speed;
+            if (distance > race.distance) numWaysToBeat += 1;
+        }
+
+        margin *= numWaysToBeat;
+    }
+
+    std.debug.print("{d} \n", .{margin});
 }
 
 const Race = struct {
