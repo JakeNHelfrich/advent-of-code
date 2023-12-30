@@ -1,5 +1,6 @@
 const std = @import("std");
-const HandType = @import("./hand.zig").HandType;
+const hand = @import("./hand.zig");
+const HandType = hand.HandType;
 const parse = @import("./parse.zig");
 const print = std.debug.print;
 
@@ -32,19 +33,8 @@ fn sortHands(ctx: void, a: parse.Play, b: parse.Play) bool {
         const aCard = a.hand[ind];
         const bCard = b.hand[ind];
         if (aCard == bCard) continue;
-        return rankCard(aCard) catch 1 > rankCard(bCard) catch 0;
+        return hand.rankCardWithJoker(aCard) catch 1 > hand.rankCardWithJoker(bCard) catch 0;
     }
 
     return true;
-}
-
-fn rankCard(card: u8) !u8 {
-    return switch (card) {
-        'A' => 14,
-        'K' => 13,
-        'Q' => 12,
-        'J' => 11,
-        'T' => 10,
-        else => std.fmt.charToDigit(card, 10),
-    };
 }

@@ -27,7 +27,7 @@ pub fn parseGame(reader: anytype, alloc: std.mem.Allocator) !CamelCardGame {
 
         const play = Play{
             .hand = hand,
-            .type = try handUtils.classifyHand(hand, alloc),
+            .type = try handUtils.classifyHandWithJokers(hand, alloc),
             .bid = bid,
         };
 
