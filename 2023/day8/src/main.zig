@@ -14,23 +14,55 @@ pub fn main() !void {
     buffer.clearAndFree();
 
     const network = try nw.parseNetwork(std.heap.page_allocator, reader);
+    var paths = try getStartingPaths(std.heap.page_allocator, network);
 
-    var currentNode: []const u8 = "AAA";
     var currentInstruction: usize = 0;
-    var count: i32 = 0;
-    while (!std.mem.eql(u8, currentNode, "ZZZ")) : ({
+    var numDone: i32 = 0;
+    var numSteps: i32 = 0;
+    while (numDone < paths.len) : ({
         currentInstruction = (currentInstruction + 1) % instructions.len;
-        count += 1;
+        numSteps += 1;
     }) {
+        numDone = 0;
         const instruction = instructions[currentInstruction];
-        const children = network.get(currentNode).?;
+        for (0..paths.len) |ind| {
+            var path = paths[ind];
 
-        currentNode = try switch (instruction) {
-            'L' => children.left,
-            'R' => children.right,
-            else => error.InvalidInstruction,
-        };
+            const currentNode = path.node;
+            const children = network.get(currentNode).?;
+            path.node = try switch (instruction) {
+                'L' => children.left,
+                'R' => children.right,
+                else => error.InvalidInstruction,
+            };
+
+            if (std.mem.endsWith(u8, path.node, "Z")) {
+                numDone += 1;
+            }
+            // I need to find a better solution to this.
+            // I couldn't find a way to mutate in place within a slice.
+            paths[ind] = path;
+        }
+
+        std.debug.print("{d} {d} {d} \n", .{ paths.len, numDone, numSteps });
     }
 
-    std.debug.print("Number of steps: {d} \n", .{count});
+    std.debug.print("Number of steps: {d} \n", .{numSteps});
+}
+
+const Path = struct { node: []const u8, end: bool };
+
+fn getStartingPaths(allocator: std.mem.Allocator, network: nw.Network) ![]Path {
+    var nodeIter = network.keyIterator();
+    var startingPaths = std.ArrayList(Path).init(allocator);
+    while (nodeIter.next()) |node| {
+        if (std.mem.endsWith(u8, node.*, "A")) {
+            try startingPaths.append(Path{
+                .node = node.*,
+                .end = false,
+            });
+        }
+    }
+
+    return startingPaths.items;
 }
