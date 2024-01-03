@@ -31,8 +31,8 @@ pub fn main() !void {
 fn predictNextNumber(allocator: std.mem.Allocator, starting_sequence: []i128) !i128 {
     var last_sequence: []i128 = starting_sequence;
     var next_sequence = std.ArrayList(i128).init(allocator);
-    var terminal_numbers = std.ArrayList(i128).init(allocator);
-    try terminal_numbers.append(last_sequence[last_sequence.len - 1]);
+    var origin_numbers = std.ArrayList(i128).init(allocator);
+    try origin_numbers.append(last_sequence[0]);
     var extrapolate_numbers = std.ArrayList(i128).init(allocator);
 
     while (blk: {
@@ -43,7 +43,7 @@ fn predictNextNumber(allocator: std.mem.Allocator, starting_sequence: []i128) !i
         break :blk sum;
     } != 0) : ({
         next_sequence.clearAndFree();
-        try terminal_numbers.append(last_sequence[last_sequence.len - 1]);
+        try origin_numbers.insert(0, last_sequence[0]);
     }) {
         for (last_sequence[1..], 1..) |num, index| {
             const prev_number = last_sequence[index - 1];
@@ -55,8 +55,9 @@ fn predictNextNumber(allocator: std.mem.Allocator, starting_sequence: []i128) !i
     }
 
     try extrapolate_numbers.append(0);
-    for (terminal_numbers.items, 0..) |num, ind| {
-        const new_num: i128 = num + extrapolate_numbers.items[ind];
+    for (origin_numbers.items, 0..) |num, ind| {
+        const new_num: i128 = num - extrapolate_numbers.items[ind];
+        //std.debug.print("origin number: {d}, extrapolated number: {d}, new num: {d} \n", .{ num, extrapolate_numbers.items[ind], new_num });
         try extrapolate_numbers.append(new_num);
     }
 
