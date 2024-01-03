@@ -38,7 +38,7 @@ fn predictNextNumber(allocator: std.mem.Allocator, starting_sequence: []i128) !i
     while (blk: {
         var sum: i128 = 0;
         for (last_sequence) |num| {
-            sum += num;
+            if (num != 0) sum += 1;
         }
         break :blk sum;
     } != 0) : ({
