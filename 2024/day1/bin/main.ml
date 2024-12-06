@@ -9,4 +9,5 @@ let print_file file_name = begin
     close_in_noerr ic
 end
 
-let _ = print_file "data/sample.txt"
+let _ = "data/sample.txt"
+  |> print_file
